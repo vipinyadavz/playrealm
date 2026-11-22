@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vipinyadavz.github.io/playrealm/sitemap.xml

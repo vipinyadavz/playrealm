@@ -1,0 +1,12 @@
+Fonts served with PlayRealm
+===========================
+
+These font files are redistributed unchanged (subset and compressed by Google Fonts)
+under the SIL Open Font License, Version 1.1: https://openfontlicense.org
+
+  Figtree          Copyright 2022 The Figtree Project Authors (https://github.com/erikdkennedy/figtree)
+  JetBrains Mono   Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)
+  Unbounded        Copyright 2022 The Unbounded Project Authors (https://github.com/w3f/unbounded)
+
+The Open Font License asks that its full text travel with the fonts. Keep a copy of the
+licence text (OFL.txt, from the link above) in this folder when you publish the site.
