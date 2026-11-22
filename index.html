@@ -38,18 +38,28 @@
   <div id="hub">
     <header class="topbar">
       <a class="brand" href="#" aria-label="PlayRealm home">Play<span>Realm</span></a>
-      <nav class="filters" id="filters" aria-label="Filter games"></nav>
       <label class="search">
         <span class="visually-hidden">Search games</span>
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4.2-4.2"/></svg>
-        <input id="search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+        <input id="search" type="search" placeholder="Search games" autocomplete="off" spellcheck="false" aria-keyshortcuts="/">
+        <kbd class="search__key" aria-hidden="true">/</kbd>
       </label>
-      <button type="button" class="profile-chip" id="profile-btn" aria-haspopup="dialog">
-        <span class="profile-chip__lvl" id="profile-lvl">Lv 1</span>
-        <span class="profile-chip__label">Profile</span>
-        <span class="profile-chip__streak" id="profile-streak" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-1.5.5-2.5 1.5-3.5C9 11 10 11 10 9c0-2 1-4.5 2-7z"/></svg><b></b></span>
-      </button>
+      <div class="topbar__actions">
+        <button type="button" class="profile-chip" id="profile-btn" aria-haspopup="dialog" aria-label="Your profile">
+          <span class="profile-chip__lvl" id="profile-lvl">Lv 1</span>
+          <span class="profile-chip__label">Profile</span>
+          <span class="profile-chip__streak" id="profile-streak" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-1.5.5-2.5 1.5-3.5C9 11 10 11 10 9c0-2 1-4.5 2-7z"/></svg><b></b></span>
+        </button>
+      </div>
     </header>
+
+    <div class="rail" id="rail">
+      <div class="dock">
+        <button type="button" class="dock__nav" id="dock-prev" aria-label="Show earlier categories" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
+        <nav class="filters" id="filters" aria-label="Filter games by category"></nav>
+        <button type="button" class="dock__nav" id="dock-next" aria-label="Show more categories" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+      </div>
+    </div>
 
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero__copy">

@@ -7,7 +7,7 @@
    */
 'use strict';
 
-const CACHE = 'playrealm-5cf200b136';
+const CACHE = 'playrealm-feed697ceb';
 const NETWORK_WAIT_MS = 4000;
 
 self.addEventListener('install', () => self.skipWaiting());

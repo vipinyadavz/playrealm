@@ -277,6 +277,26 @@
     els.empty.hidden = shown > 0;
     els.emptyQ.textContent = query;
     filterButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === filter)));
+    // Keep the chosen tab inside the dock's visible part.
+    const on = filterButtons.find((b) => b.dataset.filter === filter && !b.hidden);
+    const root = els.filtersRoot;
+    if (on) {
+      const left = on.offsetLeft - root.offsetLeft;
+      if (left < root.scrollLeft) root.scrollLeft = left - 8;
+      else if (left + on.offsetWidth > root.scrollLeft + root.clientWidth) root.scrollLeft = left + on.offsetWidth - root.clientWidth + 8;
+    }
+    syncDock();
+  }
+
+  /* The category dock: arrows appear when the tabs do not all fit. */
+  function syncDock() {
+    const root = els.filtersRoot;
+    const prev = $('#dock-prev');
+    const next = $('#dock-next');
+    if (!prev || !next) return;
+    const spare = root.scrollWidth - root.clientWidth;
+    prev.hidden = spare <= 4 || root.scrollLeft < 4;
+    next.hidden = spare <= 4 || root.scrollLeft > spare - 4;
   }
 
   filterButtons.forEach((b) => b.addEventListener('click', () => {
@@ -289,6 +309,46 @@
     e.preventDefault();
     root.scrollLeft += e.deltaY;
   }, { passive: false });
+  const dockStep = (dir) => els.filtersRoot.scrollBy({
+    left: dir * Math.max(160, els.filtersRoot.clientWidth * 0.7),
+    behavior: reducedMotion ? 'auto' : 'smooth'
+  });
+  $('#dock-prev').addEventListener('click', () => dockStep(-1));
+  $('#dock-next').addEventListener('click', () => dockStep(1));
+  els.filtersRoot.addEventListener('scroll', syncDock, { passive: true });
+  // Showing or hiding an arrow resizes the tab strip itself, so never do it inside the
+  // observer's own callback (the browser reports that as a resize loop): wait a frame.
+  if (window.ResizeObserver) new ResizeObserver(() => requestAnimationFrame(syncDock)).observe(els.filtersRoot);
+
+  /* The dock steps aside while you scroll down the shelves and is back the moment you scroll up. */
+  const rail = $('#rail');
+  let railY = window.scrollY;
+  window.addEventListener('scroll', () => {
+    if (!rail || !els.play.hidden) return;
+    const y = window.scrollY;
+    if (y < 140) rail.classList.remove('is-away');
+    else if (y > railY + 8) rail.classList.add('is-away');
+    else if (y < railY - 8) rail.classList.remove('is-away');
+    else return; // too small a move to count: keep measuring from the same point
+    railY = y;
+  }, { passive: true });
+
+  els.search.placeholder = 'Search ' + games.length + ' games';
+
+  /* On phones the search button sits at the front of the dock, so the bar stays one short row. */
+  const searchBox = els.search.closest('.search');
+  const searchHome = searchBox.parentElement;
+  const searchBefore = searchBox.nextElementSibling;
+  const narrow = window.matchMedia('(max-width: 760px)');
+  function placeSearch() {
+    const dock = $('.dock');
+    if (narrow.matches && dock) dock.prepend(searchBox);
+    else searchHome.insertBefore(searchBox, searchBefore);
+    syncDock();
+  }
+  if (narrow.addEventListener) narrow.addEventListener('change', placeSearch);
+  else if (narrow.addListener) narrow.addListener(placeSearch);
+  placeSearch();
 
   /* ============ Private shelf (def.adult games): exists only while the gate script has it
      unlocked. All of its wording comes from the gate (Gate.text); without that script none

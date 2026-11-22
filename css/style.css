@@ -23,6 +23,7 @@
   --line: 3px solid var(--ink);
   --lift: 6px 6px 0 var(--ink);
   --gutter: clamp(16px, 4vw, 52px);
+  --bar-h: 64px;
   color-scheme: light;
 }
 
@@ -51,7 +52,7 @@ a { color: inherit; }
   outline-offset: 3px;
 }
 /* The sun ring reads on the blue and dark areas; on white and yellow surfaces use ink. */
-.topbar :focus-visible, .playbar :focus-visible, .profile :focus-visible, .howto :focus-visible,
+.topbar :focus-visible, .dock :focus-visible, .playbar :focus-visible, .profile :focus-visible, .howto :focus-visible,
 .bezel :focus-visible, .quests :focus-visible, .today :focus-visible, .legal :focus-visible {
   outline-color: var(--ink);
 }
@@ -134,20 +135,22 @@ kbd {
   cursor: pointer;
 }
 
-/* ---------- Top bar ---------- */
+/* ---------- Top bar: the brand, search, and the player's own buttons. Nothing else. ---------- */
 .topbar {
   position: sticky;
   top: 0;
   z-index: 20;
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 12px var(--gutter);
+  gap: 14px;
+  min-height: var(--bar-h);
+  padding: 0 var(--gutter);
   color: var(--ink);
   background: var(--paper);
   border-bottom: var(--line);
 }
 .brand {
+  flex: none;
   font: 900 22px/1 var(--font-display);
   letter-spacing: -.5px;
   text-decoration: none;
@@ -162,40 +165,20 @@ kbd {
   border-radius: 8px;
   transform: rotate(-3deg);
 }
+.topbar__actions { display: flex; flex: none; align-items: center; gap: 12px; margin-left: auto; }
 
-.filters {
+.search {
+  position: relative;
   display: flex;
-  gap: 8px;
-  margin-left: auto;
-  padding: 4px 6px 8px 2px;
-  overflow-x: auto;
-  scrollbar-width: thin; /* visible, so mouse users can reach the last chips */
+  flex: 1 1 auto;
+  align-items: center;
+  max-width: 420px;
+  margin-left: clamp(6px, 3vw, 44px);
 }
-.filter {
-  padding: 7px 14px;
-  font: 800 14px/1.2 var(--font-body);
-  color: var(--ink);
-  white-space: nowrap;
-  background: var(--paper);
-  border: 2px solid var(--ink);
-  border-radius: 999px;
-  box-shadow: 3px 3px 0 var(--ink);
-  cursor: pointer;
-  transition: transform .08s ease, box-shadow .08s ease;
-}
-.filter:hover { background: var(--paper-2); }
-.filter[aria-pressed="true"] {
-  background: var(--sun);
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--ink);
-}
-.filter__n { font: 600 12px var(--font-mono); opacity: .65; margin-left: 2px; }
-
-.search { position: relative; display: flex; align-items: center; }
 .search svg {
   position: absolute;
-  left: 12px;
-  width: 16px; height: 16px;
+  left: 15px;
+  width: 17px; height: 17px;
   fill: none;
   stroke: var(--ink);
   stroke-width: 2.4;
@@ -203,15 +186,105 @@ kbd {
   pointer-events: none;
 }
 .search input {
-  width: 190px;
-  padding: 8px 12px 8px 34px;
-  font: 700 14px var(--font-body);
+  width: 100%;
+  height: 42px;
+  padding: 0 46px 0 42px;
+  font: 700 15px var(--font-body);
   color: var(--ink);
   background: var(--paper-2);
   border: 2px solid var(--ink);
   border-radius: 999px;
+  transition: background-color .12s ease, box-shadow .12s ease;
 }
-.search input::placeholder { color: #5B5F86; }
+.search input::placeholder { color: #5B5F86; font-weight: 600; }
+.search input:hover { background: #E4E8FF; }
+.search input:focus { background: var(--paper); box-shadow: 3px 3px 0 var(--ink); }
+/* The "/" key hint: gone once you are typing, and on touch screens. */
+.search__key {
+  position: absolute;
+  right: 12px;
+  margin: 0;
+  pointer-events: none;
+  transition: opacity .12s ease;
+}
+.search:focus-within .search__key,
+.search input:not(:placeholder-shown) ~ .search__key { opacity: 0; }
+@media (pointer: coarse) { .search__key { display: none; } }
+
+/* ---------- Category dock: one floating tray under the bar ----------
+   It slides away while you scroll down and comes back the moment you scroll up. */
+.rail {
+  position: sticky;
+  top: var(--bar-h);
+  z-index: 19;
+  display: flex;
+  justify-content: center;
+  padding: 14px var(--gutter) 0;
+  pointer-events: none; /* only the tray itself takes clicks; the page shows through around it */
+  transition: transform .3s cubic-bezier(.3, 1.3, .5, 1), opacity .2s ease;
+}
+.rail.is-away { transform: translateY(-140%); opacity: 0; }
+.rail.is-away:focus-within { transform: none; opacity: 1; }
+.dock {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 5px;
+  background: var(--paper);
+  border: var(--line);
+  border-radius: 999px;
+  box-shadow: 5px 5px 0 var(--ink);
+  pointer-events: auto;
+}
+.filters {
+  display: flex;
+  gap: 2px;
+  min-width: 0;
+  overflow-x: auto;
+  border-radius: 999px;
+  scrollbar-width: none; /* the arrows, a swipe, the wheel or Tab all scroll it */
+  scroll-behavior: smooth;
+}
+.filters::-webkit-scrollbar { display: none; }
+/* Tabs are flat; only the chosen one is a key pressed into the tray. */
+.filter {
+  flex: none;
+  padding: 9px 11px;
+  font: 800 14px/1.15 var(--font-body);
+  color: #2A2D52;
+  white-space: nowrap;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color .12s ease, color .12s ease;
+}
+.filter:hover { color: var(--ink); background: var(--paper-2); }
+.filter[aria-pressed="true"] {
+  color: var(--ink);
+  background: var(--sun);
+  border-color: var(--ink);
+  box-shadow: inset 0 -3px 0 rgba(11, 11, 26, .2);
+}
+.filter__n { margin-left: 2px; font: 600 11px var(--font-mono); opacity: .55; }
+.filter[aria-pressed="true"] .filter__n { opacity: .8; }
+.dock__nav {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: var(--ink);
+  background: var(--paper-2);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.dock__nav:hover { background: var(--sun); }
+.dock__nav svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+@media (pointer: coarse) { .dock__nav { display: none; } }
 
 /* ---------- Hero: the playable headline ---------- */
 .hero {
@@ -663,12 +736,55 @@ main { padding: 0 var(--gutter) 40px; outline: none; }
 .play:fullscreen .howto { display: none; }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 1080px) {
-  .topbar { flex-wrap: wrap; gap: 10px 14px; }
-  .filters { order: 3; width: 100%; margin-left: 0; }
-  .search { margin-left: auto; }
-  .search input { width: 150px; }
+/* Phones and narrow windows: the bar is the brand and your two buttons. Search moves to the
+   front of the dock (js/app.js moves it) as a round button that opens over the tabs. */
+@media (max-width: 760px) {
+  :root { --bar-h: 58px; }
+  .topbar { gap: 8px; }
+  .brand { font-size: 18px; }
+  .topbar__actions { gap: 8px; }
+  .rail { padding-top: 10px; }
+  .dock { position: relative; width: 100%; box-shadow: 4px 4px 0 var(--ink); }
+  .filter { padding: 9px 10px; }
+  .search__key { display: none; } /* the folded search button has no room for the key hint */
+  .dock .search {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    max-width: none;
+    margin: 0;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+  }
+  .dock .search svg { left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  /* Invisible but covering the button: tapping it focuses the field. */
+  .dock .search input { position: absolute; inset: 0; height: 100%; padding: 0; border: 0; opacity: 0; cursor: pointer; }
+  /* A search that is still filtering the page: the button says so. */
+  .dock .search:has(input:not(:placeholder-shown)) { background: var(--sun); }
+  /* Open: the field covers the tabs, edge to edge inside the tray. */
+  .dock .search:focus-within {
+    position: absolute;
+    inset: 4px;
+    z-index: 2;
+    width: auto;
+    height: auto;
+    background: var(--paper);
+    border: 0;
+    border-radius: 999px;
+  }
+  .dock .search:focus-within svg { left: 15px; z-index: 1; transform: translateY(-50%); }
+  .dock .search:focus-within input {
+    padding: 0 14px 0 42px;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    box-shadow: none;
+    opacity: 1;
+    cursor: text;
+  }
 }
+@media (max-width: 350px) { .brand { font-size: 16px; } }
 
 @media (max-width: 900px) {
   .hero { grid-template-columns: minmax(0, 1fr); }
@@ -683,7 +799,6 @@ main { padding: 0 var(--gutter) 40px; outline: none; }
 }
 
 @media (max-width: 560px) {
-  .search input { width: 120px; }
   .grid { grid-template-columns: minmax(0, 1fr); gap: 30px; }
   .box__token { right: -6px; }
   .playbar { gap: 10px 12px; padding-top: 10px; padding-bottom: 10px; }
@@ -718,7 +833,8 @@ main { padding: 0 var(--gutter) 40px; outline: none; }
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 12px 4px 4px;
+  height: 42px;
+  padding: 0 6px;
   font: 800 14px/1 var(--font-body);
   color: var(--ink);
   background: var(--paper);
@@ -727,10 +843,17 @@ main { padding: 0 var(--gutter) 40px; outline: none; }
   box-shadow: 3px 3px 0 var(--ink);
   cursor: pointer;
   white-space: nowrap;
+  transition: transform .08s ease, box-shadow .08s ease;
 }
+.profile-chip:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
 .profile-chip:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.profile-chip__label { padding-right: 6px; }
+/* The word "Profile" only where there is room to spare; the level badge is the button. */
+@media (max-width: 1100px) { .profile-chip__label { display: none; } }
+/* (Two classes: the streak badge's own display rule comes later in this file.) */
+@media (max-width: 480px) { .profile-chip .profile-chip__streak { display: none; } }
 .profile-chip__lvl {
-  padding: 5px 8px;
+  padding: 7px 10px;
   font: 800 12px/1 var(--font-display);
   color: var(--paper);
   background: var(--blue);
@@ -970,7 +1093,6 @@ main { padding: 0 var(--gutter) 40px; outline: none; }
   .profile__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 560px) {
-  .profile-chip__label { display: none; }
   .profile { padding: 18px; }
   .profile__level { width: 70px; height: 70px; }
   .profile__level strong { font-size: 28px; }
@@ -1233,7 +1355,13 @@ main { padding: 0 var(--gutter) 40px; outline: none; }
 /* ---------- Phones: notches, zoom-on-focus ---------- */
 /* viewport-fit=cover lets the page run under the notch and home bar: keep controls clear of them. */
 @supports (padding: max(0px, env(safe-area-inset-left))) {
-  .topbar, .playbar {
+  .topbar {
+    padding-top: env(safe-area-inset-top);
+    padding-left: max(var(--gutter), env(safe-area-inset-left));
+    padding-right: max(var(--gutter), env(safe-area-inset-right));
+  }
+  .rail { top: calc(var(--bar-h) + env(safe-area-inset-top)); }
+  .playbar {
     padding-top: max(12px, env(safe-area-inset-top));
     padding-left: max(var(--gutter), env(safe-area-inset-left));
     padding-right: max(var(--gutter), env(safe-area-inset-right));
